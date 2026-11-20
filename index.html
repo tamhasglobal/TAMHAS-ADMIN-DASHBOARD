@@ -1,1 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d1b">
+<title>TAMHAS GLOBAL GROUP | Admin Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#080d1b;color:#eef3ff}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:245px;background:#0d1528;padding:25px 16px;border-right:1px solid #202c43;flex-shrink:0}
+.logo{font-size:19px;font-weight:bold;color:#65aaff;margin-bottom:35px}
+.logo span{display:block;font-size:10px;color:#a5b5cf;margin-top:7px;letter-spacing:2px}
+.nav-title{font-size:10px;color:#71819d;margin:22px 10px 10px}
+.nav a{display:block;text-decoration:none;color:#aebbd1;padding:12px;border-radius:9px;margin:4px 0;font-size:14px}
+.nav a.active,.nav a:hover{background:#172b4b;color:#70b4ff}
+.main{flex:1;min-width:0;padding:28px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:30px}
+.topbar h1{font-size:23px}
+.admin{font-size:12px;color:#85baff;background:#142440;padding:10px 14px;border-radius:20px}
+.welcome{padding:25px;border:1px solid #253b5d;border-radius:15px;background:linear-gradient(120deg,#14294a,#10182b);margin-bottom:25px}
+.welcome h2{font-size:22px;margin-bottom:9px}
+.welcome p{color:#aabbd4;font-size:13px;line-height:1.7}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:28px}
+.card{background:#101a2e;border:1px solid #24334d;padding:20px;border-radius:13px}
+.card small{color:#9aabc5}
+.card h3{font-size:25px;margin-top:12px;color:#70b4ff}
+.section-title{font-size:18px;margin:25px 0 15px}
+.panel{background:#101a2e;border:1px solid #24334d;border-radius:13px;padding:20px;margin-bottom:15px}
+.panel h3{font-size:15px;margin-bottom:9px}
+.panel p{font-size:13px;color:#9aabc5;line-height:1.7}
+.status{display:inline-block;color:#f2c879;background:#382e19;padding:6px 10px;border-radius:20px;font-size:11px;margin-top:12px}
+.notice{font-size:12px;color:#9aabc5;margin-top:20px;line-height:1.7}
+@media(max-width:700px){
+.layout{display:block}
+.sidebar{width:100%;padding:17px}
+.logo{margin-bottom:15px}
+.nav{display:flex;overflow-x:auto;gap:5px}
+.nav-title{display:none}
+.nav a{white-space:nowrap;font-size:12px;padding:10px}
+.main{padding:18px}
+.topbar h1{font-size:19px}
+.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:380px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+<div class="logo">TAMHAS GLOBAL GROUP
+<span>ADMINISTRATION PANEL</span></div>
+<div class="nav-title">MAIN MENU</div>
+<nav class="nav">
+<a class="active" href="#dashboard">Dashboard</a>
+<a href="#website">Website</a>
+<a href="#messages">Messages</a>
+<a href="#projects">Projects</a>
+<a href="#services">Services</a>
+<a href="#settings">Settings</a>
+</nav>
+</aside>
 
+<main class="main" id="dashboard">
+<header class="topbar">
+<h1>Admin Dashboard</h1>
+<div class="admin">ADMIN PANEL</div>
+</header>
+
+<section class="welcome">
+<h2>Welcome to TAMHAS GLOBAL GROUP</h2>
+<p>Manage your company website and business platform from one central dashboard.</p>
+</section>
+
+<div class="cards">
+<div class="card"><small>Website</small><h3>01</h3></div>
+<div class="card"><small>Management</small><h3>06</h3></div>
+<div class="card"><small>System</small><h3>01</h3></div>
+</div>
+
+<h2 class="section-title">Management Center</h2>
+
+<div class="panel" id="website">
+<h3>Website Management</h3>
+<p>Manage homepage, company information, content and website appearance.</p>
+<span class="status">Backend Required</span>
+</div>
+
+<div class="panel" id="messages">
+<h3>Messages Management</h3>
+<p>Customer messages and contact inquiries will be managed here.</p>
+<span class="status">Backend Required</span>
+</div>
+
+<div class="panel" id="projects">
+<h3>Projects Management</h3>
+<p>Add, edit and manage company projects.</p>
+<span class="status">Backend Required</span>
+</div>
+
+<div class="panel" id="services">
+<h3>Services Management</h3>
+<p>Manage company services and descriptions.</p>
+<span class="status">Backend Required</span>
+</div>
+
+<div class="panel" id="settings">
+<h3>System Settings</h3>
+<p>Admin security, account access and website settings.</p>
+<span class="status">Setup Pending</span>
+</div>
+
+<p class="notice">TAMHAS GLOBAL GROUP — Building Tomorrow, Globally.<br>This is the initial dashboard interface. Secure authentication and backend integration are not enabled yet.</p>
+</main>
+</div>
+</body>
+</html>
