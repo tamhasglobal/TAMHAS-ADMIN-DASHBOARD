@@ -1,0 +1,2 @@
+# TAMHAS-ADMIN-DASHBOARD
+Official Admin Dashboard of TAMHAS GLOBAL GROUP
