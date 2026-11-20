@@ -20,22 +20,29 @@ h3{font-size:16px;margin-bottom:10px}
 .desc{font-size:13px;color:#9aabc5;margin-bottom:20px;line-height:1.6}
 label{display:block;font-size:13px;margin:14px 0 8px}
 input,textarea{width:100%;padding:13px;background:#080d1b;border:1px solid #34445f;border-radius:9px;color:white;font-size:14px;outline:none}
-textarea{min-height:110px;resize:vertical;font-family:monospace}
+textarea{min-height:110px;resize:vertical;font-family:Arial,sans-serif}
 button{padding:13px 17px;background:#2379dc;color:white;border:0;border-radius:9px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:13px}
 button:disabled{opacity:.6}
-#status,#settingsStatus{font-size:13px;line-height:1.6;margin-top:14px;text-align:center;color:#9aabc5}
+#status,#settingsStatus,#contentStatus{font-size:13px;line-height:1.6;margin-top:14px;text-align:center;color:#9aabc5}
 #dashboard{display:none}
 .card{background:#142440;border:1px solid #263956;padding:17px;border-radius:10px;margin-top:13px}
 .card p{font-size:13px;color:#aabbd4;line-height:1.6}
 .logout{background:#263956;width:100%;margin-top:20px}
-.setting-item{background:#080d1b;border:1px solid #34445f;padding:14px;border-radius:9px;margin-top:12px;overflow-wrap:anywhere}
-.setting-item pre{white-space:pre-wrap;color:#aabbd4;font-size:12px;margin-top:9px}
+.item{background:#080d1b;border:1px solid #34445f;padding:14px;border-radius:9px;margin-top:12px;overflow-wrap:anywhere}
+.item pre{white-space:pre-wrap;color:#aabbd4;font-size:12px;margin-top:9px}
+.item p{font-size:13px;color:#aabbd4;line-height:1.6;margin-top:8px}
 .delete-btn{background:#9d303d;margin-left:8px}
 .small{font-size:12px;color:#9aabc5;margin-top:10px;line-height:1.6}
 .footer{text-align:center;font-size:11px;color:#71819d;margin:20px}
 #loginPanel{max-width:430px;margin:auto}
+.status-label{display:inline-block;padding:5px 9px;border-radius:6px;background:#263956;font-size:11px;margin-top:8px}
+.published{background:#145d40;color:#a6f5cc}
+.unpublished{background:#594522;color:#ffe0a0}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 .actions button{flex:1}
+.checkrow{display:flex;align-items:center;gap:10px;margin-top:15px}
+.checkrow input{width:auto}
+.checkrow label{margin:0}
 </style>
 </head>
 
@@ -71,7 +78,7 @@ button:disabled{opacity:.6}
 
 <div class="card">
 <h3>Website Management</h3>
-<p>Website content management — future module.</p>
+<p>Manage website content from your administration panel.</p>
 </div>
 
 <div class="card">
@@ -85,6 +92,44 @@ button:disabled{opacity:.6}
 </div>
 </div>
 
+<!-- WEBSITE CONTENT -->
+<div class="panel">
+<h2>Website Content Management</h2>
+<p class="desc">Create, edit, publish and manage your website content.</p>
+
+<form id="contentForm">
+<input type="hidden" id="contentId">
+
+<label for="contentSlug">Content Slug</label>
+<input id="contentSlug" type="text" placeholder="Example: about-us" required>
+
+<label for="contentTitle">Content Title</label>
+<input id="contentTitle" type="text" placeholder="Example: About TAMHAS GLOBAL GROUP" required>
+
+<label for="contentBody">Content Description</label>
+<textarea id="contentBody" placeholder="Write your website content here..."></textarea>
+
+<div class="checkrow">
+<input id="contentPublished" type="checkbox">
+<label for="contentPublished">Publish this content</label>
+</div>
+
+<button id="contentSaveBtn" type="submit">Save Content</button>
+<button type="button" id="contentCancelBtn" style="background:#34445f">Clear Form</button>
+
+<p id="contentStatus" role="status"></p>
+</form>
+
+<div style="margin-top:25px">
+<h3>Saved Website Content</h3>
+<div id="contentList">
+<p class="small">Loading content...</p>
+</div>
+<button id="contentRefreshBtn" type="button">Refresh Content</button>
+</div>
+</div>
+
+<!-- SYSTEM SETTINGS -->
 <div class="panel">
 <h2>System Settings</h2>
 <p class="desc">Manage settings stored in your Supabase database.</p>
@@ -112,7 +157,6 @@ button:disabled{opacity:.6}
 </div>
 
 <button class="logout" id="logoutBtn">Sign Out</button>
-
 </section>
 
 <p class="footer">Building Tomorrow, Globally.</p>
@@ -123,7 +167,6 @@ button:disabled{opacity:.6}
 <script>
 const SUPABASE_URL = "https://wthpnjaejgxvxdwwasru.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Hu3Z832uD274dCVfQaIV5Q_c7bHcWzv";
-
 const ADMIN_USER_ID = "bbce5818-bbc3-4703-b8f1-6ce58dcdfb00";
 
 const client = window.supabase.createClient(
@@ -138,6 +181,8 @@ const loginBtn = document.getElementById("loginBtn");
 const statusText = document.getElementById("status");
 const settingsStatus = document.getElementById("settingsStatus");
 const settingsList = document.getElementById("settingsList");
+const contentStatus = document.getElementById("contentStatus");
+const contentList = document.getElementById("contentList");
 
 function showLogin() {
   dashboard.style.display = "none";
@@ -154,7 +199,9 @@ async function showDashboard(user) {
 
   loginPanel.style.display = "none";
   dashboard.style.display = "block";
+
   await loadSettings();
+  await loadContent();
 }
 
 loginForm.addEventListener("submit", async function(event) {
@@ -167,7 +214,7 @@ loginForm.addEventListener("submit", async function(event) {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  const { data, error } = await client.auth.signInWithPassword({
+  const {data, error} = await client.auth.signInWithPassword({
     email: email,
     password: password
   });
@@ -183,14 +230,16 @@ loginForm.addEventListener("submit", async function(event) {
   await showDashboard(data.user);
 });
 
+/* SYSTEM SETTINGS */
+
 async function loadSettings() {
   settingsList.textContent = "Loading settings...";
   settingsStatus.textContent = "";
 
-  const { data, error } = await client
+  const {data, error} = await client
     .from("site_settings")
     .select("id, setting_key, setting_value, updated_at")
-    .order("id", { ascending: false });
+    .order("id", {ascending:false});
 
   if (error) {
     settingsList.textContent = "Could not load settings: " + error.message;
@@ -206,7 +255,7 @@ async function loadSettings() {
 
   data.forEach(function(item) {
     const box = document.createElement("div");
-    box.className = "setting-item";
+    box.className = "item";
 
     const title = document.createElement("h3");
     title.textContent = item.setting_key;
@@ -215,7 +264,6 @@ async function loadSettings() {
     value.textContent = JSON.stringify(item.setting_value, null, 2);
 
     const date = document.createElement("p");
-    date.className = "small";
     date.textContent = "Updated: " + new Date(item.updated_at).toLocaleString();
 
     const editButton = document.createElement("button");
@@ -224,7 +272,7 @@ async function loadSettings() {
       document.getElementById("settingKey").value = item.setting_key;
       document.getElementById("settingValue").value =
         JSON.stringify(item.setting_value, null, 2);
-      window.scrollTo({top: 0, behavior: "smooth"});
+      window.scrollTo({top:0, behavior:"smooth"});
     });
 
     const deleteButton = document.createElement("button");
@@ -250,22 +298,21 @@ document.getElementById("settingsForm").addEventListener("submit", async functio
 
   try {
     parsedValue = JSON.parse(rawValue);
-  } catch (error) {
+  } catch(error) {
     settingsStatus.textContent = "Invalid JSON. Please check your value.";
     return;
   }
 
   saveBtn.disabled = true;
   saveBtn.textContent = "Saving...";
-  settingsStatus.textContent = "";
 
-  const { error } = await client
+  const {error} = await client
     .from("site_settings")
     .upsert({
-      setting_key: key,
-      setting_value: parsedValue,
-      updated_at: new Date().toISOString()
-    }, { onConflict: "setting_key" });
+      setting_key:key,
+      setting_value:parsedValue,
+      updated_at:new Date().toISOString()
+    }, {onConflict:"setting_key"});
 
   saveBtn.disabled = false;
   saveBtn.textContent = "Save Setting";
@@ -287,10 +334,10 @@ async function deleteSetting(key) {
 
   settingsStatus.textContent = "Deleting...";
 
-  const { error } = await client
+  const {error} = await client
     .from("site_settings")
     .delete()
-    .eq("setting_key", key);
+    .eq("setting_key",key);
 
   if (error) {
     settingsStatus.textContent = "Delete failed: " + error.message;
@@ -301,15 +348,199 @@ async function deleteSetting(key) {
   await loadSettings();
 }
 
-document.getElementById("refreshBtn").addEventListener("click", loadSettings);
+document.getElementById("refreshBtn").addEventListener("click",loadSettings);
 
-document.getElementById("logoutBtn").addEventListener("click", async function() {
+
+/* WEBSITE CONTENT MANAGEMENT */
+
+function clearContentForm() {
+  document.getElementById("contentForm").reset();
+  document.getElementById("contentId").value = "";
+  document.getElementById("contentSaveBtn").textContent = "Save Content";
+  contentStatus.textContent = "";
+}
+
+document.getElementById("contentCancelBtn").addEventListener("click",clearContentForm);
+
+async function loadContent() {
+  contentList.textContent = "Loading content...";
+  contentStatus.textContent = "";
+
+  const {data,error} = await client
+    .from("site_content")
+    .select("id, slug, title, content, is_published, updated_at")
+    .order("id",{ascending:false});
+
+  if (error) {
+    contentList.textContent = "Could not load content: " + error.message;
+    return;
+  }
+
+  contentList.replaceChildren();
+
+  if (!data || data.length === 0) {
+    contentList.textContent = "No website content saved yet.";
+    return;
+  }
+
+  data.forEach(function(item) {
+    const box = document.createElement("div");
+    box.className = "item";
+
+    const title = document.createElement("h3");
+    title.textContent = item.title;
+
+    const slug = document.createElement("p");
+    slug.textContent = "Slug: " + item.slug;
+
+    const body = document.createElement("p");
+    body.textContent = item.content || "No description.";
+
+    const badge = document.createElement("span");
+    badge.className = "status-label " +
+      (item.is_published ? "published" : "unpublished");
+    badge.textContent = item.is_published ? "Published" : "Draft";
+
+    const date = document.createElement("p");
+    date.textContent = "Updated: " + new Date(item.updated_at).toLocaleString();
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click",function() {
+      document.getElementById("contentId").value = item.id;
+      document.getElementById("contentSlug").value = item.slug;
+      document.getElementById("contentTitle").value = item.title;
+      document.getElementById("contentBody").value = item.content || "";
+      document.getElementById("contentPublished").checked = item.is_published;
+      document.getElementById("contentSaveBtn").textContent = "Update Content";
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+
+    const publishButton = document.createElement("button");
+    publishButton.textContent = item.is_published ? "Unpublish" : "Publish";
+    publishButton.style.background = "#52627b";
+    publishButton.addEventListener("click",function() {
+      togglePublish(item.id,!item.is_published);
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.className = "delete-btn";
+    deleteButton.addEventListener("click",function() {
+      deleteContent(item.id);
+    });
+
+    box.append(title,slug,body,badge,date,editButton,publishButton,deleteButton);
+    contentList.appendChild(box);
+  });
+}
+
+document.getElementById("contentForm").addEventListener("submit",async function(event) {
+  event.preventDefault();
+
+  const id = document.getElementById("contentId").value;
+  const slug = document.getElementById("contentSlug").value.trim();
+  const title = document.getElementById("contentTitle").value.trim();
+  const content = document.getElementById("contentBody").value.trim();
+  const isPublished = document.getElementById("contentPublished").checked;
+  const saveButton = document.getElementById("contentSaveBtn");
+
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    contentStatus.textContent = "Use lowercase letters, numbers and hyphens in the slug.";
+    return;
+  }
+
+  saveButton.disabled = true;
+  saveButton.textContent = "Saving...";
+
+  let result;
+
+  const record = {
+    slug:slug,
+    title:title,
+    content:content,
+    is_published:isPublished,
+    updated_at:new Date().toISOString()
+  };
+
+  if (id) {
+    result = await client
+      .from("site_content")
+      .update(record)
+      .eq("id",id);
+  } else {
+    result = await client
+      .from("site_content")
+      .insert(record);
+  }
+
+  saveButton.disabled = false;
+  saveButton.textContent = id ? "Update Content" : "Save Content";
+
+  if (result.error) {
+    contentStatus.textContent = "Save failed: " + result.error.message;
+    return;
+  }
+
+  contentStatus.textContent = id ?
+    "Website content updated successfully!" :
+    "Website content saved successfully!";
+
+  clearContentForm();
+  await loadContent();
+});
+
+async function togglePublish(id,published) {
+  contentStatus.textContent = "Updating publish status...";
+
+  const {error} = await client
+    .from("site_content")
+    .update({
+      is_published:published,
+      updated_at:new Date().toISOString()
+    })
+    .eq("id",id);
+
+  if (error) {
+    contentStatus.textContent = "Update failed: " + error.message;
+    return;
+  }
+
+  contentStatus.textContent = published ? "Content published." : "Content unpublished.";
+  await loadContent();
+}
+
+async function deleteContent(id) {
+  if (!confirm("Are you sure you want to delete this content?")) return;
+
+  contentStatus.textContent = "Deleting...";
+
+  const {error} = await client
+    .from("site_content")
+    .delete()
+    .eq("id",id);
+
+  if (error) {
+    contentStatus.textContent = "Delete failed: " + error.message;
+    return;
+  }
+
+  contentStatus.textContent = "Content deleted.";
+  await loadContent();
+}
+
+document.getElementById("contentRefreshBtn").addEventListener("click",loadContent);
+
+
+/* SIGN OUT AND SESSION */
+
+document.getElementById("logoutBtn").addEventListener("click",async function() {
   await client.auth.signOut();
   loginForm.reset();
   showLogin();
 });
 
-client.auth.getSession().then(async function({ data, error }) {
+client.auth.getSession().then(async function({data,error}) {
   if (error || !data.session) {
     showLogin();
     return;
@@ -317,6 +548,13 @@ client.auth.getSession().then(async function({ data, error }) {
 
   await showDashboard(data.session.user);
 });
+
+client.auth.onAuthStateChange(function(event,session) {
+  if (event === "SIGNED_OUT") {
+    showLogin();
+  }
+});
 </script>
+
 </body>
 </html>
