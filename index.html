@@ -1,34 +1,44 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#080d1b">
-<title>TAMHAS GLOBAL GROUP | Admin Login</title>
+<title>TAMHAS GLOBAL GROUP | Admin Dashboard</title>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#080d1b;color:#eef3ff;min-height:100vh;display:grid;place-items:center;padding:20px}
-.container{width:100%;max-width:430px}
-.brand{text-align:center;margin-bottom:25px}
+body{font-family:Arial,sans-serif;background:#080d1b;color:#eef3ff;min-height:100vh;padding:20px}
+.container{width:100%;max-width:850px;margin:auto}
+.brand{text-align:center;margin:20px 0 25px}
 .brand h1{font-size:25px;color:#70b4ff}
 .brand p{font-size:11px;color:#9aabc5;letter-spacing:3px;margin-top:9px}
-.panel{background:#101a2e;border:1px solid #263956;border-radius:17px;padding:28px}
-.panel h2{font-size:22px;margin-bottom:9px}
-.desc{font-size:13px;color:#9aabc5;margin-bottom:25px;line-height:1.6}
-label{display:block;font-size:13px;margin-bottom:9px}
-input{width:100%;padding:14px;margin-bottom:19px;background:#080d1b;border:1px solid #34445f;border-radius:9px;color:white;font-size:15px;outline:none}
-input:focus{border-color:#70b4ff}
-button{width:100%;padding:14px;background:#2379dc;color:white;border:0;border-radius:9px;font-size:15px;font-weight:bold;cursor:pointer}
+.panel{background:#101a2e;border:1px solid #263956;border-radius:17px;padding:24px;margin-bottom:20px}
+h2{font-size:22px;margin-bottom:10px}
+h3{font-size:16px;margin-bottom:10px}
+.desc{font-size:13px;color:#9aabc5;margin-bottom:20px;line-height:1.6}
+label{display:block;font-size:13px;margin:14px 0 8px}
+input,textarea{width:100%;padding:13px;background:#080d1b;border:1px solid #34445f;border-radius:9px;color:white;font-size:14px;outline:none}
+textarea{min-height:110px;resize:vertical;font-family:monospace}
+button{padding:13px 17px;background:#2379dc;color:white;border:0;border-radius:9px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:13px}
 button:disabled{opacity:.6}
-#status{font-size:13px;line-height:1.6;margin-top:17px;text-align:center;color:#9aabc5}
+#status,#settingsStatus{font-size:13px;line-height:1.6;margin-top:14px;text-align:center;color:#9aabc5}
 #dashboard{display:none}
 .card{background:#142440;border:1px solid #263956;padding:17px;border-radius:10px;margin-top:13px}
-.card h3{font-size:15px;margin-bottom:7px}
 .card p{font-size:13px;color:#aabbd4;line-height:1.6}
-.logout{margin-top:20px;background:#263956}
-.footer{text-align:center;font-size:11px;color:#71819d;margin-top:20px}
+.logout{background:#263956;width:100%;margin-top:20px}
+.setting-item{background:#080d1b;border:1px solid #34445f;padding:14px;border-radius:9px;margin-top:12px;overflow-wrap:anywhere}
+.setting-item pre{white-space:pre-wrap;color:#aabbd4;font-size:12px;margin-top:9px}
+.delete-btn{background:#9d303d;margin-left:8px}
+.small{font-size:12px;color:#9aabc5;margin-top:10px;line-height:1.6}
+.footer{text-align:center;font-size:11px;color:#71819d;margin:20px}
+#loginPanel{max-width:430px;margin:auto}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1}
 </style>
 </head>
+
 <body>
 <div class="container">
 
@@ -53,37 +63,68 @@ button:disabled{opacity:.6}
 </form>
 </section>
 
-<section class="panel" id="dashboard">
+<section id="dashboard">
+
+<div class="panel">
 <h2>Welcome, Admin!</h2>
 <p class="desc">TAMHAS GLOBAL GROUP Management Center</p>
 
 <div class="card">
 <h3>Website Management</h3>
-<p>Website content management will be connected here.</p>
+<p>Website content management — future module.</p>
 </div>
+
 <div class="card">
 <h3>Messages Management</h3>
-<p>Customer messages management will be connected here.</p>
+<p>Customer messages management — future module.</p>
 </div>
+
 <div class="card">
 <h3>Projects & Services</h3>
-<p>Manage company projects and services in future updates.</p>
+<p>Project and service management — future module.</p>
 </div>
-<div class="card">
-<h3>System Settings</h3>
-<p>Admin account and system settings.</p>
+</div>
+
+<div class="panel">
+<h2>System Settings</h2>
+<p class="desc">Manage settings stored in your Supabase database.</p>
+
+<form id="settingsForm">
+<label for="settingKey">Setting Name</label>
+<input id="settingKey" type="text" placeholder="Example: company_name" required>
+
+<label for="settingValue">Setting Value (JSON)</label>
+<textarea id="settingValue" required placeholder='{"name":"TAMHAS GLOBAL GROUP"}'></textarea>
+
+<p class="small">Enter valid JSON. Example: {"name":"TAMHAS GLOBAL GROUP"}</p>
+
+<button id="saveBtn" type="submit">Save Setting</button>
+<p id="settingsStatus" role="status"></p>
+</form>
+
+<div style="margin-top:25px">
+<h3>Saved Settings</h3>
+<div id="settingsList">
+<p class="small">Loading settings...</p>
+</div>
+<button id="refreshBtn" type="button">Refresh Settings</button>
+</div>
 </div>
 
 <button class="logout" id="logoutBtn">Sign Out</button>
+
 </section>
 
 <p class="footer">Building Tomorrow, Globally.</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const SUPABASE_URL = "https://wthpnjaejgxvxdwwasru.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Hu3Z832uD274dCVfQaIV5Q_c7bHcWzv";
+
+const ADMIN_USER_ID = "bbce5818-bbc3-4703-b8f1-6ce58dcdfb00";
 
 const client = window.supabase.createClient(
   SUPABASE_URL,
@@ -95,15 +136,25 @@ const dashboard = document.getElementById("dashboard");
 const loginForm = document.getElementById("loginForm");
 const loginBtn = document.getElementById("loginBtn");
 const statusText = document.getElementById("status");
-
-function showDashboard() {
-  loginPanel.style.display = "none";
-  dashboard.style.display = "block";
-}
+const settingsStatus = document.getElementById("settingsStatus");
+const settingsList = document.getElementById("settingsList");
 
 function showLogin() {
   dashboard.style.display = "none";
   loginPanel.style.display = "block";
+}
+
+async function showDashboard(user) {
+  if (!user || user.id !== ADMIN_USER_ID) {
+    await client.auth.signOut();
+    showLogin();
+    statusText.textContent = "Access denied. Admin account only.";
+    return;
+  }
+
+  loginPanel.style.display = "none";
+  dashboard.style.display = "block";
+  await loadSettings();
 }
 
 loginForm.addEventListener("submit", async function(event) {
@@ -129,33 +180,142 @@ loginForm.addEventListener("submit", async function(event) {
     return;
   }
 
-  if (data.user) {
-    statusText.textContent = "";
-    showDashboard();
-  }
+  await showDashboard(data.user);
 });
+
+async function loadSettings() {
+  settingsList.textContent = "Loading settings...";
+  settingsStatus.textContent = "";
+
+  const { data, error } = await client
+    .from("site_settings")
+    .select("id, setting_key, setting_value, updated_at")
+    .order("id", { ascending: false });
+
+  if (error) {
+    settingsList.textContent = "Could not load settings: " + error.message;
+    return;
+  }
+
+  settingsList.replaceChildren();
+
+  if (!data || data.length === 0) {
+    settingsList.textContent = "No settings saved yet.";
+    return;
+  }
+
+  data.forEach(function(item) {
+    const box = document.createElement("div");
+    box.className = "setting-item";
+
+    const title = document.createElement("h3");
+    title.textContent = item.setting_key;
+
+    const value = document.createElement("pre");
+    value.textContent = JSON.stringify(item.setting_value, null, 2);
+
+    const date = document.createElement("p");
+    date.className = "small";
+    date.textContent = "Updated: " + new Date(item.updated_at).toLocaleString();
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", function() {
+      document.getElementById("settingKey").value = item.setting_key;
+      document.getElementById("settingValue").value =
+        JSON.stringify(item.setting_value, null, 2);
+      window.scrollTo({top: 0, behavior: "smooth"});
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.className = "delete-btn";
+    deleteButton.addEventListener("click", function() {
+      deleteSetting(item.setting_key);
+    });
+
+    box.append(title, value, date, editButton, deleteButton);
+    settingsList.appendChild(box);
+  });
+}
+
+document.getElementById("settingsForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const key = document.getElementById("settingKey").value.trim();
+  const rawValue = document.getElementById("settingValue").value.trim();
+  const saveBtn = document.getElementById("saveBtn");
+
+  let parsedValue;
+
+  try {
+    parsedValue = JSON.parse(rawValue);
+  } catch (error) {
+    settingsStatus.textContent = "Invalid JSON. Please check your value.";
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
+  settingsStatus.textContent = "";
+
+  const { error } = await client
+    .from("site_settings")
+    .upsert({
+      setting_key: key,
+      setting_value: parsedValue,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "setting_key" });
+
+  saveBtn.disabled = false;
+  saveBtn.textContent = "Save Setting";
+
+  if (error) {
+    settingsStatus.textContent = "Save failed: " + error.message;
+    return;
+  }
+
+  settingsStatus.textContent = "Setting saved successfully!";
+  document.getElementById("settingKey").value = "";
+  document.getElementById("settingValue").value = "";
+
+  await loadSettings();
+});
+
+async function deleteSetting(key) {
+  if (!confirm("Are you sure you want to delete this setting?")) return;
+
+  settingsStatus.textContent = "Deleting...";
+
+  const { error } = await client
+    .from("site_settings")
+    .delete()
+    .eq("setting_key", key);
+
+  if (error) {
+    settingsStatus.textContent = "Delete failed: " + error.message;
+    return;
+  }
+
+  settingsStatus.textContent = "Setting deleted.";
+  await loadSettings();
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadSettings);
 
 document.getElementById("logoutBtn").addEventListener("click", async function() {
   await client.auth.signOut();
-  showLogin();
   loginForm.reset();
+  showLogin();
 });
 
-client.auth.getSession().then(({data}) => {
-  if (data.session) {
-    showDashboard();
-  } else {
+client.auth.getSession().then(async function({ data, error }) {
+  if (error || !data.session) {
     showLogin();
+    return;
   }
-});
 
-client.auth.onAuthStateChange((event, session) => {
-  if (event === "SIGNED_IN" && session) {
-    showDashboard();
-  }
-  if (event === "SIGNED_OUT") {
-    showLogin();
-  }
+  await showDashboard(data.session.user);
 });
 </script>
 </body>
